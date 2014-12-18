@@ -7,7 +7,7 @@ module Artoo
     class << self; attr_accessor :connection_types, :device_types; end
 
     module ClassMethods
-      attr_accessor :working_code, :use_api, :api_host, :api_port
+      attr_accessor :working_code, :use_api, :use_secure_api, :api_host, :api_port, :auth_host, :auth_port, :application_id, :secret
 
       # Connection to some hardware that has one or more devices via some specific protocol
       # @example connection :arduino, :adaptor => :firmata, :port => '/dev/tty.usbmodemxxxxx'
@@ -56,6 +56,21 @@ module Artoo
         self.api_host = params[:host] || '127.0.0.1'
         self.api_port = params[:port] || '4321'
       end
+      
+      # Activate RESTful secure api
+      # Example:
+      #   secure_api :host => '127.0.0.1',
+      #              :port => '1234', :token => 'ABA98F55'
+      def secure_api(params = {})
+        Celluloid::Logger.info "Registering secure api..."
+        self.use_secure_api = true
+        self.api_host = params[:host] || '127.0.0.1'
+        self.api_port = params[:port] || '4321'
+        self.auth_host = params[:auth_host] || '127.0.0.1'
+        self.auth_port = params[:auth_port] || '5000'
+        self.application_id = params[:application_id] || ''
+        self.secret = params[:secret] || ''
+      end
 
       # Work can be performed by either:
       #  an existing instance
@@ -69,6 +84,7 @@ module Artoo
         unless cli?
           begin
             start_api
+            start_secure_api
             Artoo::Master.start_work
             begin_working
           rescue Interrupt
@@ -115,6 +131,10 @@ module Artoo
 
       def start_api
         Celluloid::Actor[:api] = Api::Server.new(self.api_host, self.api_port) if self.use_api
+      end
+      
+      def start_secure_api
+        Celluloid::Actor[:secure_api] = SecureApi::Server.new(self.api_host, self.api_port, self.auth_host, self.auth_port, self.application_id, self.secret) if self.use_secure_api
       end
 
       # @return [Boolean] True if test env
