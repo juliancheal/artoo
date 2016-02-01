@@ -312,7 +312,7 @@ Done!
 
 Check out our [documentation](http://artoo.io/documentation/) for lots of information about how to use Artoo.
 
-If you want to help us with some documentation on the site, you can go to [artoo.io branch](https://github.com/hybridgroup/artoo/tree/artoo.io) and then, follow the instructions.
+If you want to help us with some documentation on the site, you can go to [artoo.io repository](https://github.com/hybridgroup/artoo-site) and then, follow the instructions.
 
 ## IRC
 
